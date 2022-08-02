@@ -1,5 +1,6 @@
 const canvas = document.getElementById("canvas");
 const ctx = canvas.getContext("2d");
+const speedInput = document.getElementById("speed");
 canvas.width = 1000;
 canvas.height = 600;
 
@@ -7,8 +8,8 @@ let canvasPosition = canvas.getBoundingClientRect();
 
 window.addEventListener("resize", function (e) {
   canvasPosition = canvas.getBoundingClientRect();
-  console.log("nice");
 });
+
 
 const mouse = {
   x: canvas.width / 2,
@@ -16,12 +17,17 @@ const mouse = {
   click: false,
 };
 
+const square = {
+    x: canvas.width/2,
+    y: canvas.height / 2,
+    size: 50,
+    angle: 0,
+    speed: 101 - speedInput.value
+  };
 
 canvas.addEventListener("mousemove", function (event) {
-  if (mouse.click) {
-    mouse.x = event.x - canvasPosition.left;
-    mouse.y = event.y - canvasPosition.top;
-  }
+  mouse.x = event.x - canvasPosition.left;
+  mouse.y = event.y - canvasPosition.top;
 });
 
 canvas.addEventListener("mousedown", function (event) {
@@ -30,61 +36,59 @@ canvas.addEventListener("mousedown", function (event) {
   mouse.y = event.y - canvasPosition.top;
 });
 
-canvas.addEventListener("mouseup", function (event) {
+document.addEventListener("mouseup", function (event) {
   mouse.click = false;
 });
 
-const square = {
-  x: canvas.width,
-  y: canvas.height / 2,
-  size: 50,
-  angle: 45,
-  frameX: 0,
-  frameY: 0,
-};
+speedInput.addEventListener("input", function (e) {
+    square.speed = speedInput.value ? 101 - speedInput.value : 30
+});
 
 function update() {
   const dx = square.x - mouse.x;
   const dy = square.y - mouse.y;
-  let theta = Math.atan2(dx, dy);
+  let theta = Math.atan2(dy, dx);
   square.angle = theta;
-  if (mouse.x != square.x) {
-    square.x -= dx / 30;
-  }
-  if (mouse.y != square.y) {
-    square.y -= dy / 30;
+  if (mouse.click) {
+    if (mouse.x != square.x) {
+      square.x -= dx / square.speed;
+    }
+    if (mouse.y != square.y) {
+      square.y -= dy / square.speed;
+    }
   }
 }
 
-function draw() {
+function draw(x, y, angle, size) {
   if (mouse.click) {
     ctx.lineWidth = 1;
     ctx.beginPath();
-    ctx.moveTo(square.x, square.y);
+    ctx.moveTo(x, y);
     ctx.lineTo(mouse.x, mouse.y);
     ctx.stroke();
   }
 
   ctx.fillStyle = "red";
   ctx.beginPath();
-//   ctx.rotate(square.angle);
+  ctx.save();
+  ctx.translate(x, y);
+  ctx.rotate(angle);
+  ctx.translate(-x, -y);
   ctx.rect(
-    square.x - square.size / 2,
-    square.y - square.size / 2,
-    square.size,
-    square.size
+    x - size / 2,
+    y - size / 2,
+    size,
+    size
   );
   ctx.fill();
+  ctx.restore();
   ctx.closePath();
-
-
-
 }
 
 function animate() {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
   update();
-  draw();
+  draw(square.x, square.y, square.angle, square.size);
   requestAnimationFrame(animate);
 }
 animate();
