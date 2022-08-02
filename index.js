@@ -1,5 +1,6 @@
 const canvas = document.getElementById("canvas");
 const ctx = canvas.getContext("2d");
+const speedInput = document.getElementById("speed");
 canvas.width = 1000;
 canvas.height = 600;
 
@@ -9,11 +10,20 @@ window.addEventListener("resize", function (e) {
   canvasPosition = canvas.getBoundingClientRect();
 });
 
+
 const mouse = {
   x: canvas.width / 2,
   y: canvas.height / 2,
   click: false,
 };
+
+const square = {
+    x: canvas.width/2,
+    y: canvas.height / 2,
+    size: 50,
+    angle: 0,
+    speed: 101 - speedInput.value
+  };
 
 canvas.addEventListener("mousemove", function (event) {
   mouse.x = event.x - canvasPosition.left;
@@ -30,12 +40,9 @@ document.addEventListener("mouseup", function (event) {
   mouse.click = false;
 });
 
-const square = {
-  x: canvas.width/2,
-  y: canvas.height / 2,
-  size: 50,
-  angle: 0,
-};
+speedInput.addEventListener("input", function (e) {
+    square.speed = speedInput.value ? 101 - speedInput.value : 30
+});
 
 function update() {
   const dx = square.x - mouse.x;
@@ -44,10 +51,10 @@ function update() {
   square.angle = theta;
   if (mouse.click) {
     if (mouse.x != square.x) {
-      square.x -= dx / 30;
+      square.x -= dx / square.speed;
     }
     if (mouse.y != square.y) {
-      square.y -= dy / 30;
+      square.y -= dy / square.speed;
     }
   }
 }
